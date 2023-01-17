@@ -1,0 +1,64 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.container {
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.calculator {
+  width: 284px;
+  height: 483px;
+  background-image: url("./images/palmtronic-8s.jpg");
+  background-repeat: no-repeat;
+  background-size: cover;
+  display: grid;
+  grid-template-rows: 109px 109px 264px;
+}
+
+.displayScreen {
+  max-width: 100%;
+  max-height: 100%;
+}
+@font-face {
+  font-family: "digital-7 (mono italic)";
+  src: url("./fonts/digital-7\ \(mono\ italic\).ttf") format("truetype");
+}
+.result {
+  text-align: right;
+  font-size: 1.825em;
+  font-family: "digital-7 (mono italic)";
+  margin: 30px;
+  width: 200px;
+  height: 50px;
+  color: #409b96;
+  background-color: rgb(24, 23, 23);
+}
+
+.calcBottom {
+  min-height: 100%;
+  min-width: 100%;
+}
+.topCluster, .leftCluster, .rightCluster {
+  display: none;
+}
+
+.buttonGrid {
+  margin-left: 32.5px;
+  margin-top: 14.5px;
+  display: grid;
+  grid-template-columns: repeat(4, 39.5px);
+  grid-template-rows: repeat(6, 30px);
+  row-gap: 16px;
+  column-gap: 21px;
+}
+
+.buttonGrid button {
+  border: none;
+  background-color: rgba(0, 0, 0, 0.0);
+}
