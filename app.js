@@ -107,41 +107,31 @@ function numberHandler(buttonPressed, currentNumber) {
   }
 }
 
+
 function buttonHandler() {
   let buttons = Array.from(document.querySelectorAll('button'));
   let [theNum, operator, result] = ["", "", ""];
-  let [answerChain, prevOpsNoEquals, prevOpsAll] = [[],[], []];
-  let [wasNumpadPressed, wasEqualsPressed] = [true, false];
+  let [answerChain, prevOpsAll] = [[], []];
 
   buttons.forEach((e) =>
     e.addEventListener('click', (e) => {
       let buttonPressed = e.target.className;
-      wasEqualsPressed = (buttonPressed === "equals");
-      // I need to disallow operations entered contiguously, but allow equals
-      if(buttonPressed.substring(0, 2) === "op" || buttonPressed === "equals") {
+      // if either an operation or equals is pressed and the second value isn't a duplicate
+      if((buttonPressed.substring(0, 2) === "op" || buttonPressed === "equals") &&
+      (prevOpsAll[1] !== buttonPressed)) {
+        // add the button press to the all operation list
         prevOpsAll.push(buttonPressed);
+        // If the list excceeds 2 items, shift the first one out
         if (prevOpsAll.length > 2) prevOpsAll.shift();
-      }
-      if(buttonPressed.substring(0, 2) === "op") {
-        // no duplicate operations if numpad wasn't pressed in between
-        if (buttonPressed === prevOpsNoEquals[prevOpsNoEquals.length] && wasNumpadPressed === false) {
-          return;
-        } else {
-          // push button pressed to previous operations
-          prevOpsNoEquals.push(buttonPressed);
-          if (prevOpsNoEquals.length > 2) prevOpsNoEquals.shift();
-        }
       }
       // build number to input in operation
       if(buttonPressed.substring(0, 3) === "btn"){
-        wasNumpadPressed = true; // flag that numpad was pressed
         theNum += numberHandler(buttonPressed, theNum);
         displayResult(theNum);
         
       } else if (buttonPressed.substring(0, 2) === "op") {
-        // push number that was built to the end of the answerChain
-        // answerChain.push(theNum);
-        // if (answerChain.length > 2) answerChain.shift();
+        // if first number is empty, set it to theNum
+        // otherwise, set 2nd number to theNum
         (!answerChain[0]) ? answerChain[0] = theNum : answerChain[1] = theNum;
         
         if (buttonPressed === "opAdd") {
@@ -154,38 +144,46 @@ function buttonHandler() {
           operator = divide2Numbers;
         }
 
-        console.log({wasEqualsPressed});
-
-        if (wasEqualsPressed === false && prevOpsNoEquals[1]) {
-          // Calculate result using numbers in answer chain and assign it to theNum
+        if (buttonPressed !== "equals" && prevOpsAll[1]) {
           theNum = operate(answerChain[0], answerChain[1], operator).toString();
           // assign result to first number position in answer chain
           answerChain[0] = theNum;
           printAll(answerChain);
+        } else if (result) {
+          theNum = result;
         }
         
         displayResultBlink(theNum);
         theNum = "";
         
       } else if (buttonPressed === "equals") {
-        if(answerChain.length === 0 || !operator) return; 
-        answerChain[1] = theNum; // put the built number in the answer chain
-        // if (answerChain.length > 2) answerChain.shift(); // Keep list to 2 items
-        result = operate(answerChain[0], answerChain[1], operator).toString();
+        /* if plus is pressed, then enter, and if second number chain number isn't set, set first number chain value to second, and proceed as normal */
+        if(answerChain.length === 0 || !operator) return;
+        if (answerChain[0]){
+          if (theNum) {
+            answerChain[1] = theNum;
+            result = operate(answerChain[0], answerChain[1], operator).toString();
+            answerChain = [result, answerChain[1]];
+          } else {
+            result = operate(answerChain[0], answerChain[1], operator).toString();
+            answerChain = [answerChain[0], result];
+          }
+        }
+        
         displayResultBlink(result);
-        answerChain = [result, answerChain[1]];
         
       } else if (buttonPressed === "clr" || buttonPressed === "clrInput") {
         theNum = "";
+        result = "";
         answerChain = [];
-        prevOpsNoEquals = [];
+        prevOpsAll = []
         displayResultBlink("0");
       }
       
       console.log({theNum});
       console.log({result});
       printAll(answerChain);
-      printAll(prevOpsNoEquals);
+      printAll(prevOpsAll);
     })
   );
 }
@@ -200,7 +198,7 @@ function displayResult(value) {
 
 function displayResultBlink(value) {
   let result = document.querySelector(".result");
-  result.style.setProperty("color", "rgb(0,0,0,0)");
+  result.style.setProperty("color", "rgba(0,0,0,0)");
   setTimeout(() => result.style.setProperty("color", "#409b96"), 50);
   result.textContent = value;
 }
