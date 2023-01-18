@@ -2,8 +2,9 @@ const add2Numbers = (num1, num2 = 0) =>  +num1 + +num2;
 const subtract2Numbers = (num1, num2 = 0) => +num1 - +num2;
 const multiply2Numbers = (num1, num2 = num1) => +num1 * +num2;
 const divide2Numbers = (num1, num2 = 1) => +num1 / +num2;
+const squareRoot = (num) => Math.sqrt(num);
 
-const operate = (num1, num2, operator) => operator(num1, num2);
+const operate = (num1, num2, operator) => parseFloat(operator(num1, num2).toFixed(7));
 
 function createElementsInDiv(
   divName,
@@ -117,16 +118,19 @@ function buttonHandler() {
     e.addEventListener('click', (e) => {
       let buttonPressed = e.target.className;
       // if either an operation or equals is pressed and the second value isn't a duplicate
-      if((buttonPressed.substring(0, 2) === "op" || buttonPressed === "equals") &&
+      if((buttonPressed.substring(0, 2) === "op" || buttonPressed === "equals" || buttonPressed === "sqrt") &&
       (prevOpsAll[1] !== buttonPressed)) {
-        // add the button press to the all operation list
         prevOpsAll.push(buttonPressed);
-        // If the list excceeds 2 items, shift the first one out
         if (prevOpsAll.length > 2) prevOpsAll.shift();
       }
       // build number to input in operation
+      // limit to 8 digits
+      // add 0 to start if just . is pressed first
       if(buttonPressed.substring(0, 3) === "btn"){
+        if (!theNum[0] && buttonPressed === "btnPeriod") { theNum = "0." }
         theNum += numberHandler(buttonPressed, theNum);
+        // if()
+        theNum = theNum.includes(".") ? theNum.substring(0, 9): theNum.substring(0, 8);
         displayResult(theNum);
         
       } else if (buttonPressed.substring(0, 2) === "op") {
@@ -171,12 +175,24 @@ function buttonHandler() {
         }
         
         displayResultBlink(result);
-        
-      } else if (buttonPressed === "clr" || buttonPressed === "clrInput") {
         theNum = "";
-        result = "";
-        answerChain = [];
-        prevOpsAll = []
+        
+      } else if (buttonPressed === "sqrt") {
+        if (!theNum) return;
+        if (theNum) {
+          if (!answerChain[0]) {
+            theNum = operate(theNum, null, squareRoot);
+            answerChain[0] = theNum;
+            displayResult(answerChain[0]);
+          } else {
+            theNum = operate(theNum, null, squareRoot);
+            answerChain[1] = theNum;
+            displayResult(answerChain[1]);
+            }
+        }
+      }else if (buttonPressed === "clr" || buttonPressed === "clrInput") {
+        theNum = "";
+        if (buttonPressed === "clr") [result, answerChain, prevOpsAll] = ["",[],[]];
         displayResultBlink("0");
       }
       
