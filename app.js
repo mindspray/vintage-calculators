@@ -129,16 +129,16 @@ function numberFormatter(number) {
 function buttonHandler() {
   let buttons = Array.from(document.querySelectorAll('button'));
   let [theNum, operator, result] = ["", "", ""];
-  let [answerChain, prevOpsAll] = [[], []];
+  let [answerChain, prevOpsString, opsHistory] = [[], [], []];
 
   buttons.forEach((e) =>
     e.addEventListener('click', (e) => {
       let buttonPressed = e.target.className;
       // if either an operation or equals is pressed and the second value isn't a duplicate
       if((buttonPressed.substring(0, 2) === "op" || buttonPressed === "equals" || buttonPressed === "sqrt") &&
-      (prevOpsAll[1] !== buttonPressed)) {
-        prevOpsAll.push(buttonPressed);
-        if (prevOpsAll.length > 2) prevOpsAll.shift();
+      (prevOpsString[1] !== buttonPressed)) {
+        prevOpsString.push(buttonPressed);
+        if (prevOpsString.length > 2) prevOpsString.shift();
       }
       // build number to input in operation
       // limit to 8 digits
@@ -164,9 +164,12 @@ function buttonHandler() {
         } else if (buttonPressed === "opDivide") {
           operator = divide2Numbers;
         }
+        if (opsHistory[opsHistory.length-1] !== operator) opsHistory.push(operator);
+        if (opsHistory.length > 2) opsHistory.shift();
+        console.log(opsHistory[0], opsHistory[1]);
 
-        if (buttonPressed !== "equals" && prevOpsAll[1]) {
-          theNum = operate(answerChain[0], answerChain[1], operator).toString();
+        if (buttonPressed !== "equals" && prevOpsString[1]) {
+          theNum = operate(answerChain[0], answerChain[1], opsHistory[0]).toString();
           // assign result to first number position in answer chain
           answerChain[0] = theNum;
           printAll(answerChain);
@@ -178,7 +181,6 @@ function buttonHandler() {
         theNum = "";
         
       } else if (buttonPressed === "equals") {
-        /* if plus is pressed, then enter, and if second number chain number isn't set, set first number chain value to second, and proceed as normal */
         if(answerChain.length === 0 || !operator) return;
         if (answerChain[0]){
           if (theNum) {
@@ -214,14 +216,14 @@ function buttonHandler() {
         }
       }else if (buttonPressed === "clr" || buttonPressed === "clrInput") {
         theNum = "";
-        if (buttonPressed === "clr") [result, answerChain, prevOpsAll] = ["",[],[]];
+        if (buttonPressed === "clr") [result, answerChain, prevOpsString, opsHistory] = ["",[],[], []];
         displayResultBlink("0");
       }
       
       console.log({theNum});
       console.log({result});
       printAll(answerChain);
-      printAll(prevOpsAll);
+      printAll(prevOpsString);
     })
   );
 }
