@@ -164,13 +164,18 @@ function buttonHandler() {
         /* if plus is pressed, then enter, and if second number chain number isn't set, set first number chain value to second, and proceed as normal */
         if(answerChain.length === 0 || !operator) return;
         if (answerChain[0]){
-          if (theNum) {
-            answerChain[1] = theNum;
-            result = operate(answerChain[0], answerChain[1], operator).toString();
-            answerChain = [result, answerChain[1]];
+          if (answerChain[1]) {
+            if (theNum) {
+              answerChain[1] = theNum;
+              result = operate(answerChain[0], answerChain[1], operator).toString();
+              answerChain = [result, answerChain[1]];
+            } else {
+              result = operate(answerChain[0], answerChain[1], operator).toString();
+              answerChain = [result, answerChain[1]];
+            }
           } else {
             result = operate(answerChain[0], answerChain[1], operator).toString();
-            answerChain = [answerChain[0], result];
+            answerChain = [result, answerChain[0]];
           }
         }
         
