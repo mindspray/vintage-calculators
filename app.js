@@ -3,8 +3,19 @@ const subtract2Numbers = (num1, num2 = 0) => +num1 - +num2;
 const multiply2Numbers = (num1, num2 = num1) => +num1 * +num2;
 const divide2Numbers = (num1, num2 = 1) => +num1 / +num2;
 const squareRoot = (num) => Math.sqrt(num);
+const percentPlusMinus = (num1, num2, operator) => {
+  let ans;
+  if (operator === multiply2Numbers) {
+    ans = num1 * (num2 * 0.01);
+  } else if (operator === add2Numbers) {
+    ans = +num1 + +(num1 * (num2 * 0.01));
+  } else if (operator === subtract2Numbers) {
+    ans = num1 - num1 * (num2 * 0.01);
+  }
+  return numberFormatter(ans);
+};
 
-const operate = (num1, num2, operator) => parseFloat(operator(num1, num2).toFixed(7));
+const operate = (num1, num2, operator) => parseFloat(numberFormatter(operator(num1, num2).toFixed(7)));
 
 function createElementsInDiv(
   divName,
@@ -108,6 +119,12 @@ function numberHandler(buttonPressed, currentNumber) {
   }
 }
 
+function numberFormatter(number) {
+  if (!number) return;
+  if (typeof number !== 'string') number = number.toString();
+  return number.includes('.') ? number.substring(0, 9) : number.substring(0, 8);
+}
+
 
 function buttonHandler() {
   let buttons = Array.from(document.querySelectorAll('button'));
@@ -175,7 +192,7 @@ function buttonHandler() {
             // }
           } else {
             result = operate(answerChain[0], answerChain[1], operator).toString();
-            answerChain = [result, answerChain[0]];
+            answerChain = [answerChain[0], result];
           }
         }
         
