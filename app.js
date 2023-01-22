@@ -156,7 +156,7 @@ function buttonHandler() {
     e.addEventListener('click', (e) => {
       let buttonPressed = e.target.className;
       // if either an operation or equals is pressed and the second value isn't a duplicate
-      if((buttonPressed.substring(0, 2) === "op" || buttonPressed === "equals" || buttonPressed === "sqrt") &&
+      if(buttonPressed.substring(0, 3) !== "btn" &&
       (prevOpsString[1] !== buttonPressed)) {
         prevOpsString.push(buttonPressed);
         if (prevOpsString.length > 2) prevOpsString.shift();
@@ -176,9 +176,9 @@ function buttonHandler() {
         // otherwise, set 2nd number to theNum
         // This needs to be fixed to work with percentPlusMinus.
         // Also if num1 multiplication num2 equals happens, then a plus, display clears for some reason.
-        if (theNum || answerChain[0]) {
+        if ((theNum || answerChain[0] )&& prevOpsString[0] !== "percentPlusMinus") {
           (!answerChain[0]) ? answerChain[0] = theNum : answerChain[1] = theNum;
-        } else {
+        } else if (!theNum && !answerChain[0]) {
           displayResultBlink("0");
           return;
         };
@@ -188,6 +188,12 @@ function buttonHandler() {
         if (opsHistory[opsHistory.length-1] !== operator) opsHistory.push(operator);
         if (opsHistory.length > 2) opsHistory.shift();
         console.log(opsHistory[0], opsHistory[1]);
+        
+        if (prevOpsString[0] === "percentPlusMinus" && (prevOpsString[1] === "opAdd" || prevOpsString[1] === "opSubtract"))  {
+          console.log("percentPlusMinus test ran");
+          displayResultBlink(result);
+          return;
+        }
 
         if (prevOpsString[0] === "equals") {
           displayResultBlink(answerChain[0]);
@@ -213,8 +219,9 @@ function buttonHandler() {
           displayResultBlink(theNum);
           return;
         }
+        // If a number has been entered or answerChain[1] is populated
         if (theNum || answerChain[1]) {
-          // This runs when answerChain[1] is occupied, like 3+2= or 3*2= (or after 3+=)
+          // If a number has been entered or a result exists
           if (theNum || result) {
             if(theNum) answerChain[1] = theNum;
             console.log("route one");
