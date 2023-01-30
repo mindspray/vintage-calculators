@@ -146,7 +146,6 @@ function functionHandler (buttonPressed) {
   return operator;
 }
 
-
 function buttonHandler() {
   let buttons = Array.from(document.querySelectorAll('button'));
   let [theNum, operator, result] = ["", "", ""];
@@ -176,6 +175,9 @@ function buttonHandler() {
         // otherwise, set 2nd number to theNum
         // This needs to be fixed to work with percentPlusMinus.
         // Also if num1 multiplication num2 equals happens, then a plus, display clears for some reason.
+        if (prevOpsString[0] === "equals" && theNum) {
+          answerChain = [theNum, null];
+        }
         if ((theNum || answerChain[0] )&& prevOpsString[0] !== "percentPlusMinus") {
           (!answerChain[0]) ? answerChain[0] = theNum : answerChain[1] = theNum;
         } else if (!theNum && !answerChain[0]) {
@@ -194,7 +196,7 @@ function buttonHandler() {
           displayResultBlink(result);
           return;
         }
-
+        
         if (prevOpsString[0] === "equals") {
           displayResultBlink(answerChain[0]);
         } else {
