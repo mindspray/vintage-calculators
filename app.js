@@ -213,7 +213,11 @@ function calcLogic() {
       if ((e.type === "keypress" && keyboardHandler(e)) || (e.type === "keydown" && e.key === "Backspace")) {
         buttonPressed = keyPressed;
       } else if (e.type === "click") {
-        buttonPressed = e.target.className;
+        if (e.target.tagName === "BUTTON"){
+          buttonPressed = e.target.className;
+        } else {
+          return;
+        }
       } else  if (!keyboardHandler(e)){
         return;
       }
