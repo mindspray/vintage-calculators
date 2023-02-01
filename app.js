@@ -18,6 +18,8 @@ const percentPlusMinus = (num1, num2, operator) => {
 const operate = (num1, num2, operator) => {
   if (num2 === '0' && operator === divide2Numbers) {
     return '💥EXPLODES💥';
+  } else if (!operator){
+    return;
   } else {
     return parseFloat(numberFormatter(operator(num1, num2).toFixed(7)));
   }
@@ -90,6 +92,7 @@ let palmtronics8s = {
 };
 
 function keyboardHandler (e) {
+  if (e.shiftKey === true && e.key === "+") return "opAdd";
   switch (e.keyCode) {
     case 46:
       return 'btnPeriod';
@@ -113,8 +116,6 @@ function keyboardHandler (e) {
       return 'btnEight';
     case 57:
       return 'btnNine';
-    case 43:
-      return 'opAdd';
     case 45:
       return 'opSubtract';
     case 42:
@@ -195,6 +196,10 @@ function calcLogic() {
     document.defaultView.addEventListener(ev, (e) => {
       let keyPressed;
       let buttonPressed;
+      console.log(e.key, e.type);
+      if ((e.type === "keypress" && !keyboardHandler(e) ) ||
+      (e.type === "keydown" && e.key !== "Backspace") ) return;
+      
       if (e.type === "keypress") keyPressed = keyboardHandler(e);
       if (e.type === "keypress" && e.keyCode === 47) {
         e.preventDefault()
@@ -203,8 +208,9 @@ function calcLogic() {
       if (e.type === "keydown" && e.key === "Backspace") {
         e.preventDefault();
         keyPressed = "clrInput"
+        buttonPressed = keyPressed;
       }
-      if (e.type === "keypress" || e.type === "keydown" && keyboardHandler(e)) {
+      if ((e.type === "keypress" && keyboardHandler(e)) || (e.type === "keydown" && e.key === "Backspace")) {
         buttonPressed = keyPressed;
       } else if (e.type === "click") {
         buttonPressed = e.target.className;
@@ -214,14 +220,16 @@ function calcLogic() {
       // if either an operation or equals is pressed and the second value isn't a duplicate
       if (
         buttonPressed.substring(0, 3) !== 'btn' &&
+        prevOpsString[0] === 'equals'
+      ) {
+        prevOpsString[1] = buttonPressed;
+      } else if (
+        buttonPressed.substring(0, 3) !== 'btn' &&
         prevOpsString[1] !== buttonPressed
       ) {
         prevOpsString.push(buttonPressed);
         if (prevOpsString.length > 2) prevOpsString.shift();
       }
-      // build number to input in operation
-      // limit to 8 digits
-      // add 0 to start if just . is pressed first
       if (buttonPressed.substring(0, 3) === 'btn') {
         if (!theNum[0] && buttonPressed === 'btnPeriod') {
           theNum = '0.';
@@ -231,23 +239,25 @@ function calcLogic() {
         theNum = theNum.includes('.')
           ? theNum.substring(0, 9)
           : theNum.substring(0, 8);
-        displayResult(theNum);
+        displayResultBlink(theNum);
+
       } else if (buttonPressed.substring(0, 2) === 'op') {
-        // if first number is empty, set it to theNum
-        // otherwise, set 2nd number to theNum
-        // This needs to be fixed to work with percentPlusMinus.
-        // Also if num1 multiplication num2 equals happens, then a plus, display clears for some reason.
         if (prevOpsString[0] === 'equals' && theNum) {
           answerChain = [theNum, null];
         }
-        if (
-          (theNum || answerChain[0]) &&
-          prevOpsString[0] !== 'percentPlusMinus'
-        ) {
-          !answerChain[0]
-            ? (answerChain[0] = theNum)
-            : (answerChain[1] = theNum);
-        } else if (!theNum && !answerChain[0]) {
+        if (theNum){
+          if (answerChain[0] && (prevOpsString[0] !== 'percentPlusMinus' || prevOpsString[0] !== "sqrt")) {
+            !answerChain[0]
+              ? (answerChain[0] = theNum)
+              : (answerChain[1] = theNum);
+          } else if (!answerChain[0] && (prevOpsString[0] !== 'percentPlusMinus' || prevOpsString[0] !== "sqrt")) {
+            !answerChain[0]
+              ? (answerChain[0] = theNum)
+              : (answerChain[1] = theNum);
+          }
+        }
+         
+        else if (!theNum && !answerChain[0]) {
           displayResultBlink('0');
           return;
         }
@@ -275,27 +285,17 @@ function calcLogic() {
               answerChain[1],
               opsHistory[0]
             ).toString();
-            // assign result to first number position in answer chain
-            // answerChain[0] = theNum;
-            printAll(answerChain);
           }
         }
-        // else if (result) {
-        //   theNum = result;
-        // }
 
         displayResultBlink(answerChain[0]);
         theNum = '';
       } else if (buttonPressed === 'equals') {
-        /* Ok, so now 3+===... works, 3*===... works, but 3 + 3===... is failing. It creates 6, but then everything is added by 6. So that means the result is being set once to a variable, then it's adding that result  */
-        // if(answerChain.length === 0 || !operator) return;
         if (theNum && !opsHistory[0]) {
           displayResultBlink(theNum);
           return;
         }
-        // If a number has been entered or answerChain[1] is populated
         if (theNum || answerChain[1]) {
-          // If a number has been entered or a result exists
           if (theNum || result) {
             if (theNum) answerChain[1] = theNum;
             result = operate(
@@ -304,11 +304,8 @@ function calcLogic() {
               operator
             ).toString();
             answerChain = [result, answerChain[1]];
-            // Runs when theNum isn't occupied and result isn't occupied
-            // So when 3+4/=
           } else if (!theNum) {
             if (opsHistory[1] === divide2Numbers) {
-              // What do I put here?
               result = operate(answerChain[0], 1, operator).toString();
               answerChain = [answerChain[0], result];
             }
@@ -321,6 +318,10 @@ function calcLogic() {
           }
           // This runs when theNum isn't occupied AND answerChain[1] isn't occupied, so 3+= or 3*=
         } else if (!theNum) {
+          if (!answerChain[0] && !answerChain[1]) {
+            displayResultBlink("0");
+            return;
+          }
           result = operate(
             answerChain[0],
             answerChain[1],
@@ -332,18 +333,21 @@ function calcLogic() {
         displayResultBlink(result);
         theNum = '';
       } else if (buttonPressed === 'sqrt') {
-        if (!theNum) return;
-        if (theNum) {
+        if (!theNum && !answerChain[0]) {
+          displayResultBlink("0");
+          return
+        }
           if (!answerChain[0]) {
             theNum = operate(theNum, null, squareRoot);
             answerChain[0] = theNum;
             displayResult(answerChain[0]);
+            theNum = ""
           } else {
-            theNum = operate(theNum, null, squareRoot);
-            answerChain[1] = theNum;
-            displayResult(answerChain[1]);
+            answerChain = [operate(answerChain[0], null, squareRoot), null];
+            theNum = "";
+            displayResult(answerChain[0]);
           }
-        }
+        
       } else if (buttonPressed === 'clr' || buttonPressed === 'clrInput') {
         theNum = '';
         if (buttonPressed === 'clr')
