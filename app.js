@@ -196,7 +196,6 @@ function calcLogic() {
     document.defaultView.addEventListener(ev, (e) => {
       let keyPressed;
       let buttonPressed;
-      console.log(e.key, e.type);
       if ((e.type === "keypress" && !keyboardHandler(e) ) ||
       (e.type === "keydown" && e.key !== "Backspace") ) return;
       
