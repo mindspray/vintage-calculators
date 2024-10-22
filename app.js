@@ -1,23 +1,29 @@
+// Functions performing basic arithmetic operations
 const add2Numbers = (num1, num2 = 0) => +num1 + +num2;
 const subtract2Numbers = (num1, num2 = 0) => +num1 - +num2;
 const multiply2Numbers = (num1, num2 = num1) => +num1 * +num2;
 const divide2Numbers = (num1, num2 = 1) => +num1 / +num2;
+
+// Function performing square root
 const squareRoot = (num) => Math.sqrt(num);
+
+// Function handling percentages based on operation passed
 const percentPlusMinus = (num1, num2, operator) => {
   let ans;
   if (operator === multiply2Numbers) {
-    ans = num1 * (num2 * 0.01);
+    ans = num1 * (num2 * 0.01); // e.g., 20% of 100 = 100 * (20 * 0.01)
   } else if (operator === add2Numbers) {
-    ans = +num1 + +(num1 * (num2 * 0.01));
+    ans = +num1 + +(num1 * (num2 * 0.01)); // Adds a percentage
   } else if (operator === subtract2Numbers) {
-    ans = num1 - num1 * (num2 * 0.01);
+    ans = num1 - num1 * (num2 * 0.01); // Subtracts a percentage
   }
-  return numberFormatter(ans);
+  return numberFormatter(ans); // Returns the formatted number
 };
 
+// This function is the general "operate" function to execute the correct operation
 const operate = (num1, num2, operator) => {
   if (num2 === '0' && operator === divide2Numbers) {
-    return '💥EXPLODES💥';
+    return '💥EXPLODES💥'; // Special case for dividing by zero
   } else if (!operator){
     return;
   } else {
@@ -25,6 +31,7 @@ const operate = (num1, num2, operator) => {
   }
 };
 
+// Function to create elements and append them to the DOM (buttons, display, etc.)
 function createElementsInDiv(
   divName,
   element,
@@ -34,27 +41,30 @@ function createElementsInDiv(
 ) {
   let elements = [];
   let div = document.createElement('div');
-  div.className = divName;
+  div.className = divName; // Assign the class name to the div
   for (let i = 0; i < elementCount; i++) {
-    elements.push(document.createElement(element));
-    elements[i].className = elementClassNames[i];
+    elements.push(document.createElement(element)); // Create the elements
+    elements[i].className = elementClassNames[i]; // Assign class names
   }
-  div.append(...elements);
-  inSection.append(div);
+  div.append(...elements); // Append the created elements to the div
+  inSection.append(div); // Append the div to the desired section
 }
-// for when more calc stylesheets are added
+// This function is for initializing changes to the DOM, such as adding stylesheets
 function changeDOMInit() {
   let link = document.querySelector('.currentCalc');
-  link.href = './canon-palmtronic-8s.css';
+  link.href = './canon-palmtronic-8s.css'; // Points to a specific CSS file for this calculator
 }
-changeDOMInit();
+}
+changeDOMInit(); // Call it immediately to set the styles
 
+// Main calculator object representing the Canon Palmtronic 8s
 let palmtronics8s = {
   section: {
     top: document.querySelector('.calcTop'),
     mid: document.querySelector('.calcMid'),
     bottom: document.querySelector('.calcBottom'),
   },
+  // Arrays holding class names
   display: ['result'],
   button: {
     row1: ['sqrt', 'clr', 'clrInput', 'opMultiply'],
@@ -63,6 +73,7 @@ let palmtronics8s = {
     row4: ['btnOne', 'btnTwo', 'btnThree', 'opAdd'],
     row5: ['btnZero', 'btnPeriod', 'percentPlusMinus', 'equals'],
   },
+   // This method creates the calculator UI and logic
   createCalc: function () {
     let allButtons = [
       ...this.button.row1,
@@ -70,14 +81,17 @@ let palmtronics8s = {
       ...this.button.row3,
       ...this.button.row4,
       ...this.button.row5,
-    ];
+    ];// Collect all button class names from all rows into one array
+
+    // Create the display screen
     createElementsInDiv(
-      'displayScreen',
-      'p',
-      this.display.length,
-      this.display,
-      this.section.mid
+      'displayScreen', // Class name for the div
+      'p', // Paragraph element for the display
+      this.display.length, // Number of display elements
+      this.display, // Class names (i.e., 'result')
+      this.section.mid // Append it to the middle section
     );
+    // Create the buttons
     createElementsInDiv(
       'buttonGrid',
       'button',
